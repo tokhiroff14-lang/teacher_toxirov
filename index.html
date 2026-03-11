@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDUNEST — IELTS Listening Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--red:#DC2626;--red-hover:#B91C1C;--red-dim:#FEE2E2;--green:#22a55b;--green-dim:#e6f7ee;--orange:#f59e0b;--orange-dim:#fef3c7;--gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-300:#d1d5db;--gray-400:#9ca3af;--gray-600:#4b5563;--gray-800:#1f2937;--shadow:0 4px 24px rgba(0,0,0,0.08);--shadow-lg:0 8px 40px rgba(0,0,0,0.13);--radius:10px}
+body{font-family:'DM Sans',sans-serif;background:#fff;min-height:100vh;color:var(--gray-800)}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--gray-400);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:var(--red)}
+
+/* WELCOME */
+#welcome-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#fff 0%,#fef2f2 50%,#fff 100%)}
+.welcome-card{background:#fff;border:1px solid var(--gray-200);border-radius:16px;box-shadow:var(--shadow-lg);padding:48px 44px 40px;width:100%;max-width:420px;text-align:center}
+.logo-wrap{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px}
+.logo-wrap img{height:40px;width:auto;border-radius:8px}
+.brand-name{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;color:var(--gray-800);letter-spacing:-0.5px}
+.brand-subtitle{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gray-400);font-weight:500;margin-bottom:4px}
+.brand-teacher{font-size:14px;color:var(--red);font-weight:600;margin-bottom:28px}
+.welcome-card h2{font-family:'Space Grotesk',sans-serif;font-size:20px;color:var(--gray-800);margin-bottom:8px}
+.welcome-card p{font-size:14px;color:var(--gray-600);margin-bottom:24px;line-height:1.5}
+.input-wrap{position:relative;margin-bottom:8px}
+.input-wrap input{width:100%;border:2px solid var(--gray-200);border-radius:8px;padding:12px 16px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--gray-800);transition:border-color .15s;outline:none}
+.input-wrap input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(220,38,38,.1)}
+.input-wrap input.error-border{border-color:var(--red)}
+.error-msg{color:var(--red);font-size:13px;margin-bottom:16px;display:none;text-align:left}
+.btn-start{width:100%;background:var(--red);color:#fff;border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .15s,transform .1s}
+.btn-start:hover{background:var(--red-hover)}.btn-start:active{transform:scale(.99)}
+
+/* EXAM SCREEN */
+#exam-screen{display:none;flex-direction:column;min-height:100vh;background:var(--gray-50)}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:56px;background:#fff;border-bottom:2px solid var(--gray-200);flex-shrink:0;z-index:10;position:sticky;top:0}
+.top-bar-left{display:flex;align-items:center;gap:10px}
+.top-bar-logo{height:28px;width:auto;border-radius:6px}
+.top-bar-brand{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;color:var(--gray-800)}
+.practice-pill{background:var(--red-dim);color:var(--red);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.top-bar-right{display:flex;align-items:center;gap:10px}
+.student-badge{background:var(--gray-100);border:1px solid var(--gray-200);border-radius:20px;padding:4px 12px;font-size:13px;font-weight:500;color:var(--gray-600)}
+.violation-badge{background:var(--orange-dim);border:1px solid var(--orange);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600;color:var(--orange);font-family:'JetBrains Mono',monospace}
+.violation-badge.zero{background:var(--gray-100);border-color:var(--gray-200);color:var(--gray-400)}
+.timer-box{border:2px solid var(--red);background:var(--red-dim);border-radius:8px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:600;color:var(--red);min-width:80px;text-align:center;transition:opacity .4s}
+.timer-box.paused{animation:blink .8s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* HIGHLIGHT TOOLBAR */
+.highlight-toolbar{display:flex;align-items:center;gap:8px;padding:6px 20px;background:#fff;border-bottom:1px solid var(--gray-200);flex-shrink:0}
+.hl-label{font-size:12px;font-weight:600;color:var(--gray-600);text-transform:uppercase;letter-spacing:.5px;margin-right:4px}
+.hl-btn{display:flex;align-items:center;gap:6px;border:1.5px solid var(--gray-300);background:#fff;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;color:var(--gray-600);font-family:'DM Sans',sans-serif}
+.hl-btn:hover{border-color:var(--gray-400)}
+.hl-swatch{width:14px;height:14px;background:#ffe066;border:1px solid #d4b000;border-radius:2px}
+.hl-btn.active{background:#fff9c2;border-color:#f0c000;color:#856000}
+.hl-btn.clear:hover{background:var(--red-dim);border-color:var(--red);color:var(--red)}
+.hl-off:hover{border-color:var(--gray-500);background:var(--gray-100)}
+.highlighted{background:#ffe066;border-radius:2px}
+
+/* SECTION NAV */
+.section-nav{display:flex;align-items:center;gap:4px;padding:8px 20px;background:#fff;border-bottom:1px solid var(--gray-200);overflow-x:auto}
+.section-tab{padding:7px 18px;font-size:13px;font-weight:600;color:var(--gray-600);border:none;background:none;cursor:pointer;border-radius:8px;transition:all .15s;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.section-tab:hover{background:var(--gray-100);color:var(--gray-800)}
+.section-tab.active{background:var(--red);color:#fff}
+
+/* EXAM BODY */
+.exam-body{flex:1;padding:28px 20px 120px;max-width:900px;margin:0 auto;width:100%}
+.section-panel{display:none}.section-panel.active{display:block}
+.section-header{margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid var(--red-dim)}
+.section-header h2{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--gray-800);margin-bottom:4px}
+.section-header p{font-size:14px;color:var(--gray-600);font-style:italic}
+
+/* QUESTION GROUPS */
+.question-group{background:#fff;border:1px solid var(--gray-200);border-left:4px solid var(--red);border-radius:var(--radius);padding:24px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:box-shadow .2s}
+.question-group:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.question-group-title{font-size:13px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px}
+.q-item{margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--gray-100)}
+.q-item:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.q-label{font-size:14px;color:var(--gray-800);margin-bottom:8px;line-height:1.8}
+.q-number{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--red);color:#fff;border-radius:8px;font-size:13px;font-weight:700;margin-right:4px;flex-shrink:0;vertical-align:middle}
+.note-line{font-size:14px;color:var(--gray-800);line-height:1.9;padding:4px 0}
+.note-divider{border:none;border-top:1px dashed var(--gray-200);margin:14px 0}
+.section-subtitle{font-size:15px;font-weight:700;color:var(--gray-800);margin:16px 0 10px 0;padding-top:4px}
+
+/* FORM STYLE */
+.form-container{background:var(--gray-50);border:2px solid var(--gray-200);border-radius:var(--radius);padding:24px;margin:16px 0}
+.form-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;color:var(--gray-800);text-align:center;margin-bottom:16px}
+.form-row{font-size:14px;color:var(--gray-800);line-height:2;padding:3px 0}
+.form-label-bold{font-weight:600;color:var(--gray-600);min-width:140px;display:inline-block}
+
+/* INLINE INPUT */
+.inline-input{display:inline-block;width:170px;padding:5px 12px;border:2px solid var(--gray-200);border-bottom:2.5px solid var(--red);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--gray-800);outline:none;transition:all .2s;background:var(--gray-50);vertical-align:middle}
+.inline-input:focus{border-color:var(--red);background:#fff;box-shadow:0 0 0 3px rgba(220,38,38,.1)}
+.inline-input::placeholder{color:var(--gray-400);font-size:12px}
+
+/* MATCHING BOX */
+.matching-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:10px;padding:18px;margin-bottom:18px}
+.matching-box-title{font-size:13px;font-weight:700;color:var(--gray-600);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.matching-item{display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:14px;color:var(--gray-800);line-height:1.5}
+.matching-letter{font-weight:700;color:var(--red);min-width:18px}
+
+/* DROPDOWN */
+.dropdown-select{display:inline-block;padding:6px 32px 6px 12px;border:2px solid var(--gray-200);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--gray-800);outline:none;transition:all .2s;background:var(--gray-50) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23DC2626' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;appearance:none;-webkit-appearance:none;cursor:pointer;vertical-align:middle;min-width:60px}
+.dropdown-select:focus{border-color:var(--red);background-color:#fff;box-shadow:0 0 0 3px rgba(220,38,38,.1)}
+
+/* MCQ */
+.mcq-options{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.mcq-option{display:flex;align-items:center;gap:12px;padding:12px 16px;border:2px solid var(--gray-200);border-radius:10px;cursor:pointer;transition:all .15s;font-size:14px;background:var(--gray-50);user-select:none}
+.mcq-option:hover{border-color:var(--red);background:var(--red-dim)}
+.mcq-option.selected{border-color:var(--red);background:var(--red-dim);font-weight:600}
+.mcq-option input[type="radio"],.mcq-option input[type="checkbox"]{display:none}
+.mcq-check{width:20px;height:20px;border:2px solid var(--gray-300);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.mcq-option.selected .mcq-check{border-color:var(--red);background:var(--red)}
+.mcq-option.selected .mcq-check::after{content:'✓';color:#fff;font-size:13px;font-weight:700}
+.mcq-letter{font-weight:600;color:var(--red);min-width:16px}
+
+/* DIAGRAM BOX */
+.diagram-box{background:#fff;border:2px solid var(--gray-200);border-radius:var(--radius);padding:24px;margin:16px 0;text-align:center}
+.diagram-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;color:var(--gray-800);margin-bottom:16px}
+.diagram-description{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;padding:20px;font-size:13px;color:var(--gray-600);line-height:1.8;text-align:left;margin-bottom:16px}
+.diagram-description strong{color:var(--gray-800)}
+
+/* SUBMIT */
+.submit-wrap{text-align:center;padding:40px 0;margin-top:20px}
+.btn-submit{padding:14px 56px;background:var(--red);color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;box-shadow:0 4px 16px rgba(220,38,38,.3)}
+.btn-submit:hover{background:var(--red-hover);transform:translateY(-1px);box-shadow:0 6px 20px rgba(220,38,38,.4)}
+
+/* OVERLAYS */
+.overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center}
+.overlay-card{background:#fff;border-radius:16px;padding:36px 40px;max-width:440px;width:90%;text-align:center;box-shadow:var(--shadow-lg)}
+.overlay-icon{font-size:42px;margin-bottom:14px}
+.overlay-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;margin-bottom:10px;color:var(--gray-800)}
+.overlay-msg{font-size:14.5px;color:var(--gray-600);line-height:1.6;margin-bottom:16px}
+.violation-info{display:inline-block;background:var(--orange-dim);border:1px solid var(--orange);color:var(--orange);border-radius:20px;padding:4px 14px;font-size:12.5px;font-weight:600;margin-bottom:20px}
+.btn-continue{background:var(--red);color:#fff;border:none;border-radius:8px;padding:12px 32px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .15s}
+.btn-continue:hover{background:var(--red-hover)}
+
+/* CONFIRM MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center}
+.modal-card{background:#fff;border-radius:16px;padding:36px 40px;max-width:420px;width:90%;text-align:center;box-shadow:var(--shadow-lg)}
+.modal-icon{font-size:36px;margin-bottom:12px}
+.modal-title{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;margin-bottom:8px}
+.modal-msg{font-size:14px;color:var(--gray-600);margin-bottom:14px;line-height:1.6}
+.modal-viol{background:var(--orange-dim);border:1px solid var(--orange);color:var(--orange);border-radius:8px;padding:6px 14px;font-size:13px;font-weight:600;margin-bottom:20px;display:inline-block}
+.modal-btns{display:flex;gap:12px;justify-content:center}
+.btn-cancel{border:2px solid var(--gray-300);background:#fff;color:var(--gray-600);border-radius:8px;padding:10px 24px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s}
+.btn-cancel:hover{border-color:var(--gray-400)}
+.btn-confirm{background:var(--red);color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .15s}
+.btn-confirm:hover{background:var(--red-hover)}
+
+/* RESULT SCREEN */
+#result-screen{display:none;min-height:100vh;background:linear-gradient(135deg,#fff 0%,#fef2f2 50%,#fff 100%);align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto}
+.result-card{background:#fff;border-radius:16px;box-shadow:var(--shadow-lg);max-width:700px;width:100%;overflow:hidden;margin:0 auto}
+.result-header{background:var(--red);padding:24px 32px;display:flex;align-items:center;gap:14px}
+.result-header-logo{height:34px;filter:brightness(0) invert(1);border-radius:6px}
+.result-header-brand{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:#fff}
+.result-header-sub{font-size:12px;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:1.5px}
+.result-body{padding:28px 32px}
+.result-meta{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:24px}
+.meta-item{display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--gray-600)}
+.meta-item span:first-child{font-size:16px}
+.meta-item strong{color:var(--gray-800)}
+.success-notice{background:var(--green-dim);border:1px solid var(--green);border-radius:8px;padding:10px 16px;font-size:13.5px;color:var(--green);font-weight:600;text-align:center;margin-bottom:20px}
+.answers-container{border:2px solid var(--gray-200);border-radius:10px;overflow:hidden;margin-bottom:24px}
+.answers-header{background:var(--gray-100);padding:12px 18px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--gray-600)}
+.answer-row{display:flex;align-items:center;padding:10px 18px;border-bottom:1px solid var(--gray-100);transition:background .1s}
+.answer-row:last-child{border-bottom:none}
+.answer-row:nth-child(even){background:var(--gray-50)}
+.answer-row:hover{background:var(--red-dim)}
+.ans-qnum{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--red);font-size:13px;min-width:52px}
+.ans-val{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gray-800)}
+.ans-val.empty{font-style:italic;color:var(--gray-400);font-family:'DM Sans',sans-serif}
+.result-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.btn-copy{border:2px solid var(--gray-300);background:#fff;color:var(--gray-800);border-radius:8px;padding:11px 20px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s}
+.btn-copy:hover{border-color:var(--gray-500)}
+.btn-dl-pdf{background:var(--red);color:#fff;border:none;border-radius:8px;padding:11px 20px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .15s}
+.btn-dl-pdf:hover{background:var(--red-hover)}
+.btn-telegram{background:#229ED9;color:#fff;border:none;border-radius:8px;padding:11px 20px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;transition:background .15s}
+.btn-telegram:hover{background:#1a8ac8}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .top-bar{padding:0 12px}.practice-pill{display:none}.highlight-toolbar{padding:6px 12px}.section-nav{padding:6px 12px}
+  .exam-body{padding:16px 12px 100px}.question-group{padding:16px}.welcome-card{padding:32px 24px;margin:0 16px}
+  .inline-input{width:130px}.result-body{padding:20px 16px}.result-header{padding:20px 16px}
+  .result-actions{flex-direction:column;align-items:stretch}.result-actions>*{text-align:center;justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<!-- WELCOME SCREEN -->
+<div id="welcome-screen">
+  <div class="welcome-card">
+    <div class="logo-wrap">
+      <img src="https://i.ibb.co/WWYjsWTh/image.png" alt="EDUNEST" onerror="this.style.display='none'">
+      <span class="brand-name">EDUNEST</span>
+    </div>
+    <div class="brand-subtitle">IELTS Listening Practice</div>
+    <div class="brand-teacher">Teacher Toxirov</div>
+    <h2>Listening Test</h2>
+    <p>Enter your name to begin the practice test. Make sure you are in a quiet environment.</p>
+    <div class="input-wrap">
+      <input type="text" id="student-name-input" placeholder="Enter your full name" autocomplete="off">
+    </div>
+    <div class="error-msg" id="name-error">Please enter your full name (at least 3 characters).</div>
+    <button class="btn-start" onclick="startExam()">Start Test →</button>
+  </div>
+</div>
+
+<!-- VIOLATION OVERLAY -->
+<div class="overlay" id="violation-overlay" style="display:none;">
+  <div class="overlay-card">
+    <div class="overlay-icon" id="overlay-icon">⚠️</div>
+    <div class="overlay-title" id="overlay-title">Practice Paused</div>
+    <div class="overlay-msg" id="overlay-msg">You left the practice window. The timer has been paused. Please stay focused on the test.</div>
+    <div class="violation-info" id="overlay-viol-count">Tab switches / focus losses: 0 time(s)</div>
+    <br>
+    <button class="btn-continue" onclick="resumeExam()">Continue</button>
+  </div>
+</div>
+
+<!-- SUBMIT CONFIRM MODAL -->
+<div class="modal-overlay" id="submit-modal" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-icon">📋</div>
+    <div class="modal-title">Submit Your Answers?</div>
+    <div class="modal-msg">Are you sure you want to submit? Your stopwatch will stop and your answers will be recorded.</div>
+    <div class="modal-viol" id="modal-viol-text">Tab switches / focus losses during this session: 0</div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmSubmit()">Yes, Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXAM SCREEN -->
+<div id="exam-screen">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <img src="https://i.ibb.co/WWYjsWTh/image.png" class="top-bar-logo" alt="EDUNEST" onerror="this.style.display='none'">
+      <span class="top-bar-brand">EDUNEST</span>
+      <span class="practice-pill">Listening Practice</span>
+    </div>
+    <div class="top-bar-right">
+      <span class="student-badge" id="top-student-name">Student</span>
+      <span class="violation-badge zero" id="top-violation-badge">⚠ 0</span>
+      <div class="timer-box" id="timer-display">00:00</div>
+    </div>
+  </div>
+  <div class="highlight-toolbar">
+    <span class="hl-label">Highlight</span>
+    <button class="hl-btn" id="hl-toggle-btn" onclick="toggleHighlight()"><span class="hl-swatch"></span> Highlight</button>
+    <button class="hl-btn hl-off" onclick="setHighlightOff()">Off</button>
+    <button class="hl-btn clear" onclick="clearHighlights()">✕ Clear All</button>
+  </div>
+  <nav class="section-nav">
+    <button class="section-tab active" onclick="showSection(1,this)">Part 1</button>
+    <button class="section-tab" onclick="showSection(2,this)">Part 2</button>
+    <button class="section-tab" onclick="showSection(3,this)">Part 3</button>
+    <button class="section-tab" onclick="showSection(4,this)">Part 4</button>
+  </nav>
+
+  <main class="exam-body highlightable">
+
+    <!-- ===== PART 1: Questions 1–10 ===== -->
+    <div class="section-panel active" id="section1">
+      <div class="section-header">
+        <h2>Part 1 — Questions 1–10</h2>
+        <p>Complete the form below. Write ONE WORD AND/OR A NUMBER for each answer.</p>
+      </div>
+      <div class="question-group">
+        <div class="question-group-title">Oz Housesitters — Home Owner Registration Form</div>
+        <div class="form-container">
+          <div class="form-row"><span class="form-label-bold">Name:</span> Jenny Hall</div>
+          <div class="form-row"><span class="form-label-bold">Address:</span> 14 <span class="q-number">1</span> <input type="text" class="inline-input" data-q="1" placeholder="Answer..."> St, Greenfield</div>
+          <div class="form-row"><span class="form-label-bold">Mobile no:</span> <span class="q-number">2</span> <input type="text" class="inline-input" data-q="2" placeholder="Answer..."></div>
+          <div class="form-row"><span class="form-label-bold">Date required from:</span> <span class="q-number">3</span> <input type="text" class="inline-input" data-q="3" placeholder="Answer..."></div>
+          <div class="form-row"><span class="form-label-bold">Length of time required:</span> <span class="q-number">4</span> <input type="text" class="inline-input" data-q="4" placeholder="Answer..." style="width:100px"> weeks</div>
+        </div>
+        <hr class="note-divider">
+        <div class="section-subtitle">House features:</div>
+        <div class="note-line">• it has a new <span class="q-number">5</span> <input type="text" class="inline-input" data-q="5" placeholder="Answer..."></div>
+        <div class="note-line">• it is near a station</div>
+        <div class="note-line">• there is room for the housesitter's <span class="q-number">6</span> <input type="text" class="inline-input" data-q="6" placeholder="Answer..."></div>
+        <hr class="note-divider">
+        <div class="section-subtitle">Special duties required:</div>
+        <div class="note-line">• water the <span class="q-number">7</span> <input type="text" class="inline-input" data-q="7" placeholder="Answer..."> tree</div>
+        <hr class="note-divider">
+        <div class="section-subtitle">Housesitter requirements:</div>
+        <div class="note-line">• the house is large so a <span class="q-number">8</span> <input type="text" class="inline-input" data-q="8" placeholder="Answer..."> is preferred</div>
+        <div class="note-line">• no <span class="q-number">9</span> <input type="text" class="inline-input" data-q="9" placeholder="Answer..."> allowed</div>
+        <div class="note-line">• would like a check carried out by the <span class="q-number">10</span> <input type="text" class="inline-input" data-q="10" placeholder="Answer..."></div>
+      </div>
+    </div>
+
+    <!-- ===== PART 2: Questions 11–20 ===== -->
+    <div class="section-panel" id="section2">
+      <div class="section-header">
+        <h2>Part 2 — Questions 11–20</h2>
+        <p>Answer the questions below using the specified format for each group.</p>
+      </div>
+
+      <!-- Q11-16: MCQ Radio -->
+      <div class="question-group">
+        <div class="question-group-title">Questions 11–16 — Becoming a Millionaire</div>
+        <p style="font-size:14px;color:var(--gray-600);margin-bottom:16px">Choose the correct letter, <strong>A, B or C</strong>.</p>
+
+        <div class="q-item">
+          <div class="q-label"><span class="q-number">11</span> Arthur feels that when starting a business, mistakes should be</div>
+          <div class="mcq-options" data-type="radio" data-q="11">
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q11" value="A"><div class="mcq-check"></div><span class="mcq-letter">A</span> seen as an opportunity to learn.</label>
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q11" value="B"><div class="mcq-check"></div><span class="mcq-letter">B</span> predicted and minimised.</label>
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q11" value="C"><div class="mcq-check"></div><span class="mcq-letter">C</span> avoided at all costs.</label>
+          </div>
+        </div>
+
+        <div class="q-item">
+          <div class="q-label"><span class="q-number">12</span> Recent American studies found that confidence will</div>
+          <div class="mcq-options" data-type="radio" data-q="12">
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q12" value="A"><div class="mcq-check"></div><span class="mcq-letter">A</span> sometimes reduce people's chances of success.</label>
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q12" value="B"><div class="mcq-check"></div><span class="mcq-letter">B</span> be increased by reading self-help books.</label>
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q12" value="C"><div class="mcq-check"></div><span class="mcq-letter">C</span> ensure good results on business courses.</label>
+          </div>
+        </div>
+
+        <div class="q-item">
+          <div class="q-label"><span class="q-number">13</span> The American studies recommended that new entrepreneurs</div>
+          <div class="mcq-options" data-type="radio" data-q="13">
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q13" value="A"><div class="mcq-check"></div><span class="mcq-letter">A</span> listen to their colleagues' advice.</label>
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q13" value="B"><div class="mcq-check"></div><span class="mcq-letter">B</span> get professional help when things go wrong.</label>
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q13" value="C"><div class="mcq-check"></div><span class="mcq-letter">C</span> remain concentrated on their aims.</label>
+          </div>
+        </div>
+
+        <div class="q-item">
+          <div class="q-label"><span class="q-number">14</span> What does Arthur say about his own experience of marketing?</div>
+          <div class="mcq-options" data-type="radio" data-q="14">
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q14" value="A"><div class="mcq-check"></div><span class="mcq-letter">A</span> He relied on what he already knew.</label>
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q14" value="B"><div class="mcq-check"></div><span class="mcq-letter">B</span> He hired an expert to take care of it.</label>
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q14" value="C"><div class="mcq-check"></div><span class="mcq-letter">C</span> He realised its importance too late.</label>
+          </div>
+        </div>
+
+        <div class="q-item">
+          <div class="q-label"><span class="q-number">15</span> What does Arthur think is an important quality shared by good leaders?</div>
+          <div class="mcq-options" data-type="radio" data-q="15">
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q15" value="A"><div class="mcq-check"></div><span class="mcq-letter">A</span> They are ambitious for their company.</label>
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q15" value="B"><div class="mcq-check"></div><span class="mcq-letter">B</span> They can deal with difficult people.</label>
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q15" value="C"><div class="mcq-check"></div><span class="mcq-letter">C</span> They earn the respect of their workforce.</label>
+          </div>
+        </div>
+
+        <div class="q-item">
+          <div class="q-label"><span class="q-number">16</span> What does Arthur say about taking risks?</div>
+          <div class="mcq-options" data-type="radio" data-q="16">
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q16" value="A"><div class="mcq-check"></div><span class="mcq-letter">A</span> He advises being cautious.</label>
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q16" value="B"><div class="mcq-check"></div><span class="mcq-letter">B</span> He favours a long-term view.</label>
+            <label class="mcq-option" onclick="selectRadio(this)"><input type="radio" name="q16" value="C"><div class="mcq-check"></div><span class="mcq-letter">C</span> He believes it is financially advantageous.</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q17-18: Choose TWO -->
+      <div class="question-group">
+        <div class="question-group-title">Questions 17 &amp; 18</div>
+        <p style="font-size:14px;color:var(--gray-600);margin-bottom:8px">Choose <strong>TWO</strong> letters, A–E.</p>
+        <p style="font-size:14px;color:var(--gray-800);margin-bottom:16px;font-weight:600">Which TWO things does Arthur say people should focus on when developing their business idea?</p>
+        <div class="mcq-options" data-q="17-18" data-type="checkbox" data-max="2">
+          <div class="mcq-option" onclick="selectCheckbox(this,2)"><input type="checkbox" name="q17-18" value="A"><div class="mcq-check"></div><span class="mcq-letter">A</span> Making sure the idea is original</div>
+          <div class="mcq-option" onclick="selectCheckbox(this,2)"><input type="checkbox" name="q17-18" value="B"><div class="mcq-check"></div><span class="mcq-letter">B</span> Offering a better deal than competitors</div>
+          <div class="mcq-option" onclick="selectCheckbox(this,2)"><input type="checkbox" name="q17-18" value="C"><div class="mcq-check"></div><span class="mcq-letter">C</span> Being committed to it</div>
+          <div class="mcq-option" onclick="selectCheckbox(this,2)"><input type="checkbox" name="q17-18" value="D"><div class="mcq-check"></div><span class="mcq-letter">D</span> Paying attention to detail</div>
+          <div class="mcq-option" onclick="selectCheckbox(this,2)"><input type="checkbox" name="q17-18" value="E"><div class="mcq-check"></div><span class="mcq-letter">E</span> Fixing realistic prices</div>
+        </div>
+      </div>
+
+      <!-- Q19-20: Choose TWO -->
+      <div class="question-group">
+        <div class="question-group-title">Questions 19 &amp; 20</div>
+        <p style="font-size:14px;color:var(--gray-600);margin-bottom:8px">Choose <strong>TWO</strong> letters, A–E.</p>
+        <p style="font-size:14px;color:var(--gray-800);margin-bottom:16px;font-weight:600">Which TWO things does Arthur say helped him get his business started?</p>
+        <div class="mcq-options" data-q="19-20" data-type="checkbox" data-max="2">
+          <div class="mcq-option" onclick="selectCheckbox(this,2)"><input type="checkbox" name="q19-20" value="A"><div class="mcq-check"></div><span class="mcq-letter">A</span> Family support</div>
+          <div class="mcq-option" onclick="selectCheckbox(this,2)"><input type="checkbox" name="q19-20" value="B"><div class="mcq-check"></div><span class="mcq-letter">B</span> Getting a loan from a bank</div>
+          <div class="mcq-option" onclick="selectCheckbox(this,2)"><input type="checkbox" name="q19-20" value="C"><div class="mcq-check"></div><span class="mcq-letter">C</span> Good business advice</div>
+          <div class="mcq-option" onclick="selectCheckbox(this,2)"><input type="checkbox" name="q19-20" value="D"><div class="mcq-check"></div><span class="mcq-letter">D</span> A favourable economic climate</div>
+          <div class="mcq-option" onclick="selectCheckbox(this,2)"><input type="checkbox" name="q19-20" value="E"><div class="mcq-check"></div><span class="mcq-letter">E</span> An effective approach to business</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PART 3: Questions 21–30 ===== -->
+    <div class="section-panel" id="section3">
+      <div class="section-header">
+        <h2>Part 3 — Questions 21–30</h2>
+        <p>Answer the questions below using the specified format for each group.</p>
+      </div>
+
+      <!-- Q21-26: Matching -->
+      <div class="question-group">
+        <div class="question-group-title">Questions 21–26</div>
+        <p style="font-size:14px;color:var(--gray-600);margin-bottom:8px">What is said about each of the following experiments?</p>
+        <p style="font-size:14px;color:var(--gray-600);margin-bottom:16px">Choose <strong>SIX</strong> answers from the box and write the correct letter, <strong>A–H</strong>, next to questions 21–26.</p>
+
+        <div class="matching-box">
+          <div class="matching-box-title">Comments</div>
+          <div class="matching-item"><span class="matching-letter">A</span> very boring</div>
+          <div class="matching-item"><span class="matching-letter">B</span> too difficult</div>
+          <div class="matching-item"><span class="matching-letter">C</span> specialised equipment needed</div>
+          <div class="matching-item"><span class="matching-letter">D</span> very expensive</div>
+          <div class="matching-item"><span class="matching-letter">E</span> immediate results</div>
+          <div class="matching-item"><span class="matching-letter">F</span> useful practice for maths</div>
+          <div class="matching-item"><span class="matching-letter">G</span> cheap to do</div>
+          <div class="matching-item"><span class="matching-letter">H</span> takes longer than usual to do</div>
+        </div>
+
+        <p style="font-size:13px;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Subject of Experiments</p>
+
+        <div class="q-item"><div class="q-label"><span class="q-number">21</span> Steam engine <select class="dropdown-select" data-q="21"><option value="">–</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option></select></div></div>
+        <div class="q-item"><div class="q-label"><span class="q-number">22</span> Breakfast cereals <select class="dropdown-select" data-q="22"><option value="">–</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option></select></div></div>
+        <div class="q-item"><div class="q-label"><span class="q-number">23</span> Bouncing balls <select class="dropdown-select" data-q="23"><option value="">–</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option></select></div></div>
+        <div class="q-item"><div class="q-label"><span class="q-number">24</span> Making paper <select class="dropdown-select" data-q="24"><option value="">–</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option></select></div></div>
+        <div class="q-item"><div class="q-label"><span class="q-number">25</span> Tie-dyeing <select class="dropdown-select" data-q="25"><option value="">–</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option></select></div></div>
+        <div class="q-item"><div class="q-label"><span class="q-number">26</span> Glue from milk <select class="dropdown-select" data-q="26"><option value="">–</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option></select></div></div>
+      </div>
+
+      <!-- Q27-30: Diagram labelling -->
+      <div class="question-group">
+        <div class="question-group-title">Questions 27–30</div>
+        <p style="font-size:14px;color:var(--gray-600);margin-bottom:16px">Label the diagram below. Write the correct letter, <strong>A–G</strong>, next to questions 27–30.</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Condenser Diagram</div>
+          <div class="diagram-description">
+            <strong>Diagram layout (cross-section of condenser apparatus):</strong><br><br>
+            The apparatus has multiple layers from top to bottom:<br>
+            • <strong>Top:</strong> Condenser lid (inverted, holds cold water/ice)<br>
+            • <strong>A</strong> — points to the condensed water collecting inside the lid<br>
+            • <strong>G</strong> — points to the integral strainer/funnel where water drips through<br>
+            • <strong>B</strong> — points to rocks/gravel material on middle shelf<br>
+            • <strong>C</strong> — points to the outer wall of the metal container<br>
+            • <strong>E</strong> — points to a pottery bowl/container in the centre<br>
+            • <strong>D</strong> — points to the outer base of the container<br>
+            • <strong>F</strong> — points to the bottom layer (hot water area)<br>
+            • Bottom layer is labelled "Hot Water"
+          </div>
+        </div>
+
+        <div class="q-item"><div class="q-label"><span class="q-number">27</span> Metal container <select class="dropdown-select" data-q="27"><option value="">–</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div></div>
+        <div class="q-item"><div class="q-label"><span class="q-number">28</span> Integral strainer <select class="dropdown-select" data-q="28"><option value="">–</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div></div>
+        <div class="q-item"><div class="q-label"><span class="q-number">29</span> Drip tray <select class="dropdown-select" data-q="29"><option value="">–</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div></div>
+        <div class="q-item"><div class="q-label"><span class="q-number">30</span> Pottery container <select class="dropdown-select" data-q="30"><option value="">–</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div></div>
+      </div>
+    </div>
+
+    <!-- ===== PART 4: Questions 31–40 ===== -->
+    <div class="section-panel" id="section4">
+      <div class="section-header">
+        <h2>Part 4 — Questions 31–40</h2>
+        <p>Complete the notes below. Write ONE WORD ONLY for each answer.</p>
+      </div>
+
+      <div class="question-group">
+        <div class="question-group-title">Office Design</div>
+
+        <div class="section-subtitle">Early 20th Century</div>
+        <div class="note-line">• Workers employed to do <span class="q-number">31</span> <input type="text" class="inline-input" data-q="31" placeholder="Answer..."> were arranged in rows</div>
+
+        <hr class="note-divider">
+        <div class="section-subtitle">1960s to present — Variations in design of open-plan offices:</div>
+        <div class="note-line">• First, workers had individual <span class="q-number">32</span> <input type="text" class="inline-input" data-q="32" placeholder="Answer..."></div>
+        <div class="note-line">• Later, they had cubicles with high or low <span class="q-number">33</span> <input type="text" class="inline-input" data-q="33" placeholder="Answer..."></div>
+        <div class="note-line">• Nowadays, workers may have to <span class="q-number">34</span> <input type="text" class="inline-input" data-q="34" placeholder="Answer..."> a work area</div>
+
+        <hr class="note-divider">
+        <div class="section-subtitle">Survey results</div>
+        <p style="font-size:14px;color:var(--gray-600);margin-bottom:10px;font-weight:600">Attitudes of employees to open-plan designs:</p>
+        <div class="note-line">• There is a lack of <span class="q-number">35</span> <input type="text" class="inline-input" data-q="35" placeholder="Answer..."> and <span class="q-number">36</span> <input type="text" class="inline-input" data-q="36" placeholder="Answer..."></div>
+        <div class="note-line">• They pose a risk to our <span class="q-number">37</span> <input type="text" class="inline-input" data-q="37" placeholder="Answer..."> (staff records support this)</div>
+
+        <hr class="note-divider">
+        <p style="font-size:14px;color:var(--gray-600);margin-bottom:10px;font-weight:600">Attitudes of employers to open-plan designs:</p>
+        <div class="note-line">• They significantly reduce rent and <span class="q-number">38</span> <input type="text" class="inline-input" data-q="38" placeholder="Answer..."> costs</div>
+        <div class="note-line">• They improve teamwork and communication</div>
+        <div class="note-line">• They can make <span class="q-number">39</span> <input type="text" class="inline-input" data-q="39" placeholder="Answer..."> staff easier</div>
+
+        <hr class="note-divider">
+        <div class="note-line">• In reality, employees are unhappy and they are often distracted by the <span class="q-number">40</span> <input type="text" class="inline-input" data-q="40" placeholder="Answer..."> in the office.</div>
+      </div>
+
+      <div class="submit-wrap">
+        <button class="btn-submit" onclick="openSubmitModal()">Submit Answers</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="result-screen">
+  <div class="result-card">
+    <div class="result-header">
+      <img src="https://i.ibb.co/WWYjsWTh/image.png" class="result-header-logo" alt="EDUNEST" onerror="this.style.display='none'">
+      <div>
+        <div class="result-header-brand">EDUNEST</div>
+        <div class="result-header-sub">Listening Practice — Answer Sheet</div>
+      </div>
+    </div>
+    <div class="result-body">
+      <div class="success-notice" id="success-notice" style="display:none;">✓ Answer sheets have been automatically downloaded.</div>
+      <div class="result-meta">
+        <div class="meta-item"><span>👤</span> <strong id="res-name">—</strong></div>
+        <div class="meta-item"><span>📅</span> <strong id="res-date">—</strong></div>
+        <div class="meta-item"><span>⏱</span> <strong id="res-time">—</strong></div>
+        <div class="meta-item" id="res-violations-wrap"><span>⚠</span> <strong id="res-violations">—</strong></div>
+      </div>
+      <div class="answers-container">
+        <div class="answers-header">Your Answers · Questions 1–40</div>
+        <div id="answers-list"></div>
+      </div>
+      <div class="result-actions">
+        <button class="btn-copy" id="copy-btn" onclick="copyAnswers()">📋 Copy Answers</button>
+        <button class="btn-dl-pdf" onclick="generatePDF()">⬇ Download PDF</button>
+        <a href="https://t.me/toxirov_teacher" target="_blank" class="btn-telegram">✈ Contact Teacher Toxirov</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+let studentName='',timerSeconds=0,timerInterval=null,timerRunning=false,violations=0,overlayShown=false,submitted=false,highlightMode=false,examStarted=false,finalDate='';
+
+const EXAM_CONFIG={
+  examTitle:'IELTS Listening Practice',
+  brandName:'EDUNEST ACADEMY',
+  teacher:'Teacher Toxirov',
+  telegramApiUrl:'https://mdrx18.pythonanywhere.com/api/telegram/send/',
+  questionOrder:['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17-18','19-20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36','37','38','39','40']
+};
+
+const questionTexts={
+  1:'Address: 14 ___ St',2:'Mobile no',3:'Date required from',4:'Length: ___ weeks',5:'Has a new ___',
+  6:'Room for housesitter\'s ___',7:'Water the ___ tree',8:'A ___ is preferred',9:'No ___ allowed',10:'Check by the ___',
+  11:'Mistakes should be...',12:'Confidence will...',13:'New entrepreneurs should...',14:'Marketing experience',15:'Quality of leaders',16:'Taking risks',
+  17:'Business idea focus (1)',18:'Business idea focus (2)',19:'Business started help (1)',20:'Business started help (2)',
+  21:'Steam engine',22:'Breakfast cereals',23:'Bouncing balls',24:'Making paper',25:'Tie-dyeing',26:'Glue from milk',
+  27:'Metal container',28:'Integral strainer',29:'Drip tray',30:'Pottery container',
+  31:'Workers did ___',32:'Individual ___',33:'High or low ___',34:'___ a work area',35:'Lack of ___',36:'Lack of ___ (2)',
+  37:'Risk to our ___',38:'Reduce ___ costs',39:'Make ___ staff easier',40:'Distracted by the ___'
+};
+
+// ===== WELCOME =====
+document.getElementById('student-name-input').addEventListener('keydown',e=>{if(e.key==='Enter')startExam()});
+
+function startExam(){
+  const input=document.getElementById('student-name-input');
+  const errMsg=document.getElementById('name-error');
+  if(!input.value.trim()||input.value.trim().length<3){input.classList.add('error-border');errMsg.style.display='block';return}
+  input.classList.remove('error-border');errMsg.style.display='none';
+  studentName=input.value.trim();
+  document.getElementById('top-student-name').textContent=studentName;
+  document.getElementById('welcome-screen').style.display='none';
+  document.getElementById('exam-screen').style.display='flex';
+  examStarted=true;requestFullscreen();
+}
+
+// ===== FULLSCREEN =====
+function requestFullscreen(){const el=document.documentElement;if(el.requestFullscreen)el.requestFullscreen();else if(el.webkitRequestFullscreen)el.webkitRequestFullscreen();else if(el.mozRequestFullScreen)el.mozRequestFullScreen();else startTimer()}
+document.addEventListener('fullscreenchange',onFullscreenChange);
+document.addEventListener('webkitfullscreenchange',onFullscreenChange);
+document.addEventListener('mozfullscreenchange',onFullscreenChange);
+
+function isFullscreen(){return!!(document.fullscreenElement||document.webkitFullscreenElement||document.mozFullScreenElement)}
+
+let firstFullscreen=true;
+function onFullscreenChange(){
+  if(submitted||!examStarted)return;
+  if(isFullscreen()){if(firstFullscreen){firstFullscreen=false;startTimer()}if(!timerRunning&&!overlayShown)startTimer()}
+  else{if(!overlayShown){violations++;updateViolationBadge();showOverlay('fullscreen')}}
+}
+
+// ===== VISIBILITY / FOCUS =====
+document.addEventListener('visibilitychange',()=>{if(submitted||!examStarted)return;if(document.hidden&&!overlayShown){violations++;updateViolationBadge();showOverlay('tab')}});
+window.addEventListener('blur',()=>{if(submitted||!examStarted)return;if(!overlayShown){violations++;updateViolationBadge();showOverlay('blur')}});
+
+function showOverlay(type){
+  if(overlayShown)return;overlayShown=true;pauseTimer();
+  const icon=document.getElementById('overlay-icon'),title=document.getElementById('overlay-title'),msg=document.getElementById('overlay-msg'),viol=document.getElementById('overlay-viol-count');
+  if(type==='fullscreen'){icon.textContent='🖥️';title.textContent='Full Screen Required';msg.textContent='This practice test must be completed in full-screen mode. Your timer has been paused. Please click Continue to re-enter full screen and resume.'}
+  else{icon.textContent='⚠️';title.textContent='Practice Paused';msg.textContent='You left the practice window. The timer has been paused. Please stay focused on the test.'}
+  viol.textContent='Tab switches / focus losses: '+violations+' time(s)';
+  document.getElementById('violation-overlay').style.display='flex';
+}
+
+function resumeExam(){
+  document.getElementById('violation-overlay').style.display='none';overlayShown=false;
+  if(!isFullscreen()){requestFullscreen();setTimeout(()=>{if(!timerRunning)startTimer()},600)}else startTimer();
+}
+
+// ===== TIMER =====
+function startTimer(){if(timerRunning)return;timerRunning=true;document.getElementById('timer-display').classList.remove('paused');timerInterval=setInterval(()=>{timerSeconds++;updateTimerDisplay()},1000)}
+function pauseTimer(){if(!timerRunning)return;timerRunning=false;clearInterval(timerInterval);timerInterval=null;document.getElementById('timer-display').classList.add('paused')}
+function stopTimer(){timerRunning=false;clearInterval(timerInterval);timerInterval=null;document.getElementById('timer-display').classList.remove('paused')}
+function updateTimerDisplay(){const m=Math.floor(timerSeconds/60).toString().padStart(2,'0'),s=(timerSeconds%60).toString().padStart(2,'0');document.getElementById('timer-display').textContent=m+':'+s}
+function formatTime(sec){return Math.floor(sec/60)+'m '+(sec%60)+'s'}
+
+// ===== VIOLATION BADGE =====
+function updateViolationBadge(){const b=document.getElementById('top-violation-badge');b.textContent='⚠ '+violations;violations===0?b.classList.add('zero'):b.classList.remove('zero')}
+
+// ===== SECTION NAV =====
+function showSection(num,btn){document.querySelectorAll('.section-panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.section-tab').forEach(t=>t.classList.remove('active'));document.getElementById('section'+num).classList.add('active');btn.classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}
+
+// ===== HIGHLIGHT =====
+function toggleHighlight(){highlightMode=!highlightMode;document.getElementById('hl-toggle-btn').classList.toggle('active',highlightMode);document.body.style.cursor=highlightMode?'text':'default'}
+function setHighlightOff(){highlightMode=false;document.getElementById('hl-toggle-btn').classList.remove('active');document.body.style.cursor='default'}
+function clearHighlights(){document.querySelectorAll('.highlighted').forEach(el=>{const t=document.createTextNode(el.textContent);el.parentNode.replaceChild(t,el)});document.querySelectorAll('.exam-body').forEach(p=>p.normalize())}
+document.addEventListener('mouseup',function(e){
+  if(!highlightMode)return;
+  if(e.target.closest('.inline-input')||e.target.closest('.table-input')||e.target.closest('.mcq-option')||e.target.closest('.highlight-toolbar')||e.target.closest('.dropdown-select')||e.target.closest('input')||e.target.closest('select'))return;
+  const sel=window.getSelection();if(!sel||sel.isCollapsed||sel.toString().trim()==='')return;
+  const range=sel.getRangeAt(0),anc=range.commonAncestorContainer,chk=anc.nodeType===3?anc.parentElement:anc;
+  if(!chk||!chk.closest||!chk.closest('.highlightable'))return;
+  try{const span=document.createElement('span');span.className='highlighted';range.surroundContents(span)}catch(err){}
+  sel.removeAllRanges();
+});
+
+// ===== MCQ =====
+function selectRadio(label){const p=label.closest('.mcq-options');p.querySelectorAll('.mcq-option').forEach(o=>o.classList.remove('selected'));label.classList.add('selected');label.querySelector('input').checked=true}
+function selectCheckbox(el,max){const p=el.closest('.mcq-options'),inp=el.querySelector('input');if(el.classList.contains('selected')){el.classList.remove('selected');inp.checked=false}else{if(p.querySelectorAll('.mcq-option.selected').length>=max)return;el.classList.add('selected');inp.checked=true}}
+
+// ===== GATHER ANSWERS =====
+function gatherAnswers(){
+  const a={};
+  document.querySelectorAll('.inline-input').forEach(i=>{a[i.getAttribute('data-q')]=i.value.trim()});
+  document.querySelectorAll('.table-input').forEach(i=>{a[i.getAttribute('data-q')]=i.value.trim()});
+  document.querySelectorAll('.dropdown-select').forEach(s=>{a[s.getAttribute('data-q')]=s.value});
+  document.querySelectorAll('.mcq-options[data-type="radio"]').forEach(g=>{const q=g.getAttribute('data-q'),c=g.querySelector('input:checked');a[q]=c?c.value:''});
+  document.querySelectorAll('.mcq-options[data-type="checkbox"]').forEach(g=>{const q=g.getAttribute('data-q'),c=g.querySelectorAll('input:checked');a[q]=Array.from(c).map(x=>x.value).join(', ')});
+  return a;
+}
+
+function getAnswerForQ(num,answers){
+  if(answers[String(num)]!==undefined&&answers[String(num)]!=='')return answers[String(num)];
+  if(num===17||num===18){const c=answers['17-18']||'',p=c.split(',').map(s=>s.trim()).filter(Boolean);return num===17?(p[0]||''):(p[1]||'')}
+  if(num===19||num===20){const c=answers['19-20']||'',p=c.split(',').map(s=>s.trim()).filter(Boolean);return num===19?(p[0]||''):(p[1]||'')}
+  return '';
+}
+
+// ===== SUBMIT =====
+function openSubmitModal(){document.getElementById('modal-viol-text').textContent='Tab switches / focus losses during this session: '+violations;document.getElementById('submit-modal').style.display='flex'}
+function closeModal(){document.getElementById('submit-modal').style.display='none'}
+
+function confirmSubmit(){
+  closeModal();submitted=true;stopTimer();finalDate=new Date().toISOString().slice(0,10);
+  const answers=gatherAnswers();
+  if(document.exitFullscreen)document.exitFullscreen().catch(()=>{});else if(document.webkitExitFullscreen)document.webkitExitFullscreen();
+  setTimeout(()=>{autoDownloadHTML(answers);setTimeout(()=>{generatePDF();sendTelegram(answers);showResultScreen(answers)},600)},200);
+}
+
+// ===== TELEGRAM =====
+function sendTelegram(answers){
+  let text='📝 '+EXAM_CONFIG.brandName+' '+EXAM_CONFIG.examTitle+'\n👤 Student: '+studentName+'\n📅 Date: '+new Date().toLocaleString()+'\n⏱ Time: '+formatTime(timerSeconds)+'\n⚠ Violations: '+violations+'\n─────────────────\n';
+  for(let i=1;i<=40;i++)text+='Q'+i+': '+(getAnswerForQ(i,answers)||'(no answer)')+'\n';
+  fetch(EXAM_CONFIG.telegramApiUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text,send_to_all_admins:true})}).catch(err=>console.error('Telegram error:',err));
+}
+
+// ===== RESULT SCREEN =====
+function showResultScreen(answers){
+  document.getElementById('exam-screen').style.display='none';document.getElementById('result-screen').style.display='flex';
+  document.getElementById('res-name').textContent=studentName;document.getElementById('res-date').textContent=finalDate;document.getElementById('res-time').textContent=formatTime(timerSeconds);
+  const vW=document.getElementById('res-violations-wrap'),vE=document.getElementById('res-violations');
+  vE.textContent='Tab switches: '+violations;vW.style.color=violations>0?'var(--orange)':'var(--gray-400)';
+  const list=document.getElementById('answers-list');list.innerHTML='';
+  for(let i=1;i<=40;i++){const v=getAnswerForQ(i,answers),row=document.createElement('div');row.className='answer-row';
+    const q=document.createElement('div');q.className='ans-qnum';q.textContent='Q'+i;
+    const a=document.createElement('div');a.className=v?'ans-val':'ans-val empty';a.textContent=v||'(no answer)';
+    row.appendChild(q);row.appendChild(a);list.appendChild(row)}
+  document.getElementById('success-notice').style.display='block';window.scrollTo({top:0});
+}
+
+// ===== COPY =====
+function copyAnswers(){
+  const answers=gatherAnswers();let text=EXAM_CONFIG.brandName+' – '+EXAM_CONFIG.examTitle+'\nStudent: '+studentName+'\nDate: '+finalDate+'\nTime: '+formatTime(timerSeconds)+'\nViolations: '+violations+'\n\n';
+  for(let i=1;i<=40;i++)text+='Q'+i+': '+(getAnswerForQ(i,answers)||'(no answer)')+'\n';
+  navigator.clipboard.writeText(text).then(()=>{const b=document.getElementById('copy-btn');b.textContent='✓ Copied!';setTimeout(()=>b.textContent='📋 Copy Answers',2000)});
+}
+
+// ===== HTML DOWNLOAD =====
+function autoDownloadHTML(answers){
+  let rows='';for(let i=1;i<=40;i++){const v=getAnswerForQ(i,answers),d=v||'(no answer)',c=v?'#1f2937':'#9ca3af',s=v?'normal':'italic';
+    rows+='<tr><td style="font-family:monospace;color:#DC2626;font-weight:700;padding:8px 16px;">Q'+i+'</td><td style="font-family:monospace;padding:8px 16px;color:'+c+';font-style:'+s+'">'+d+'</td></tr>'}
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>EDUNEST Answer Sheet</title></head><body style="font-family:sans-serif;background:#f9fafb;margin:0;padding:40px 20px;"><div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.1);"><div style="background:#DC2626;padding:24px 32px;"><h1 style="color:#fff;margin:0;font-size:22px;">EDUNEST ACADEMY</h1><p style="color:rgba(255,255,255,0.8);margin:4px 0 0;font-size:12px;letter-spacing:2px;text-transform:uppercase;">Listening Practice — Answer Sheet</p></div><div style="padding:24px 32px;"><table style="margin-bottom:16px;font-size:14px;"><tr><td style="padding:4px 16px 4px 0;color:#4b5563;">👤 Student:</td><td><strong>'+studentName+'</strong></td></tr><tr><td style="padding:4px 16px 4px 0;color:#4b5563;">📅 Date:</td><td>'+finalDate+'</td></tr><tr><td style="padding:4px 16px 4px 0;color:#4b5563;">⏱ Time:</td><td>'+formatTime(timerSeconds)+'</td></tr><tr><td style="padding:4px 16px 4px 0;color:#4b5563;">⚠ Violations:</td><td style="color:'+(violations>0?'#f59e0b':'#9ca3af')+'">'+violations+'</td></tr></table><div style="border:2px solid #e5e7eb;border-radius:8px;overflow:hidden;"><div style="background:#f3f4f6;padding:10px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#6b7280;">Your Answers · Questions 1–40</div><table style="width:100%;border-collapse:collapse;">'+rows+'</table></div><p style="text-align:center;color:#9ca3af;font-size:12px;margin-top:20px;">Generated by EDUNEST ACADEMY — Teacher Toxirov</p></div></div></body></html>';
+  const blob=new Blob([html],{type:'text/html'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='EDUNEST_Listening_'+sanitizeName(studentName)+'_'+finalDate+'.html';a.click();URL.revokeObjectURL(url);
+}
+
+// ===== PDF =====
+function sanitizeName(n){return n.replace(/[^a-zA-Z0-9]/g,'_')}
+
+function generatePDF(){
+  const answers=gatherAnswers();const{jsPDF}=window.jspdf;const doc=new jsPDF({unit:'pt',format:'a4'});
+  const pw=doc.internal.pageSize.getWidth(),ph=doc.internal.pageSize.getHeight(),ml=36,mr=36,cw=pw-ml-mr;
+  let y;
+  function checkPage(need){if(y+need>ph-50){doc.addPage();y=36;doc.setFontSize(8);doc.setTextColor(220,38,38);doc.text('EDUNEST ACADEMY — IELTS Listening Practice',ml,20);doc.setDrawColor(220,38,38);doc.line(ml,24,pw-mr,24);y=36}}
+
+  // Header
+  doc.setFillColor(220,38,38);doc.rect(0,0,pw,80,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(22);doc.setTextColor(255,255,255);doc.text('EDUNEST ACADEMY',pw/2,30,{align:'center'});
+  doc.setFont('helvetica','normal');doc.setFontSize(11);doc.setTextColor(255,220,220);doc.text('IELTS Listening Practice — Answer Sheet',pw/2,50,{align:'center'});
+  doc.setFontSize(10);doc.text('Teacher Toxirov',pw/2,66,{align:'center'});
+
+  y=100;doc.setTextColor(75,85,99);doc.setFontSize(11);
+  [['Student:',studentName],['Date:',finalDate],['Time Spent:',formatTime(timerSeconds)],['Violations:',String(violations)]].forEach(function(p){
+    doc.setFont('helvetica','bold');doc.setTextColor(31,41,55);doc.text(p[0],ml,y);
+    doc.setFont('helvetica','normal');doc.setTextColor(75,85,99);doc.text(p[1],160,y);y+=20});
+
+  y+=8;doc.setDrawColor(229,231,235);doc.setLineWidth(1);doc.line(ml,y,pw-mr,y);y+=16;
+
+  [{title:'PART 1 — Questions 1–10',range:[1,10]},{title:'PART 2 — Questions 11–20',range:[11,20]},{title:'PART 3 — Questions 21–30',range:[21,30]},{title:'PART 4 — Questions 31–40',range:[31,40]}].forEach(function(part){
+    checkPage(30);doc.setFillColor(220,38,38);doc.rect(ml,y,cw,20,'F');
+    doc.setTextColor(255,255,255);doc.setFontSize(10);doc.setFont('helvetica','bold');doc.text(part.title,ml+8,y+13);y+=28;
+    for(let q=part.range[0];q<=part.range[1];q++){
+      checkPage(22);const av=getAnswerForQ(q,answers)||'(no answer)',hint=questionTexts[q]||'';
+      if(q%2===0){doc.setFillColor(249,250,251);doc.rect(ml,y-10,cw,20,'F')}
+      doc.setTextColor(220,38,38);doc.setFontSize(10);doc.setFont('helvetica','bold');doc.text('Q'+q,ml+4,y);
+      doc.setTextColor(107,114,128);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text(hint,ml+36,y);
+      const ax=ml+260,aw=doc.getTextWidth(av)+8;doc.setFillColor(254,240,138);doc.rect(ax-2,y-8,aw,14,'F');
+      doc.setTextColor(31,41,55);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text(av,ax+2,y);y+=20}y+=6});
+
+  checkPage(30);y+=8;doc.setDrawColor(220,38,38);doc.line(ml,y,pw-mr,y);y+=14;
+  doc.setTextColor(156,163,175);doc.setFontSize(8);doc.setFont('helvetica','normal');
+  doc.text('Auto-generated by EDUNEST ACADEMY IELTS Practice System',pw/2,y,{align:'center'});y+=12;
+  doc.text('Teacher Toxirov | Violations: '+violations+' | Time: '+formatTime(timerSeconds),pw/2,y,{align:'center'});
+  doc.save('IELTS_Listening_'+sanitizeName(studentName)+'_'+finalDate+'.pdf');
+}
+
+// ===== KEYBOARD BLOCKS =====
+document.addEventListener('keydown',function(e){if(examStarted&&!submitted){if(e.key==='Escape'){e.preventDefault();e.stopPropagation();return false}if(e.key==='F11'){e.preventDefault();return false}if((e.ctrlKey||e.metaKey)&&['c','v','a','p','C','V','A','P','w','t','n','W','T','N'].indexOf(e.key)!==-1){e.preventDefault();return false}}},true);
+document.addEventListener('contextmenu',function(e){if(examStarted&&!submitted){e.preventDefault();return false}});
+document.addEventListener('paste',function(e){if(examStarted&&!submitted)e.preventDefault()});
+document.addEventListener('copy',function(e){if(examStarted&&!submitted)e.preventDefault()});
+document.addEventListener('dragstart',function(e){if(examStarted&&!submitted)e.preventDefault()});
+</script>
+</body>
+</html>
